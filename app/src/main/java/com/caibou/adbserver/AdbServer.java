@@ -1,5 +1,6 @@
 package com.caibou.adbserver;
 
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
@@ -24,13 +25,7 @@ public class AdbServer {
 
     private final String LOG_TAG = AdbServer.class.getSimpleName();
 
-    private final int SYNC = 0x434e5953;
-    private final int CNXN = 0x4e584e43;
-    private final int AUTH = 0x48545541;
-    private final int OPEN = 0x4e45504f;
-    private final int OKAY = 0x59414b4f;
-    private final int CLSE = 0x45534c43;
-    private final int WRTE = 0x45545257;
+
 
     public void connect(String ip){
         mConnect = new SocketConnect();
@@ -50,26 +45,26 @@ public class AdbServer {
 
 
                 switch (command) {
-                    case SYNC:
+                    case AdbConstant.MSG_SYNC:
                         Log.d(LOG_TAG, "SYNC");
                         break;
-                    case CNXN:
+                    case AdbConstant.MSG_CNXN:
                         Log.d(LOG_TAG, "CNXN");
                         break;
-                    case AUTH:
+                    case AdbConstant.MSG_AUTH:
                         Log.d(LOG_TAG, "AUTH");
                         break;
-                    case OPEN:
+                    case AdbConstant.MSG_OPEN:
                         Log.d(LOG_TAG, "OPEN");
                         break;
-                    case OKAY:
+                    case AdbConstant.MSG_OKAY:
                         Log.d(LOG_TAG, "OKAY");
                         REMOTE_ID = arg1;
                         break;
-                    case CLSE:
+                    case AdbConstant.MSG_CLSE:
                         Log.d(LOG_TAG, "CLSE");
                         break;
-                    case WRTE:
+                    case AdbConstant.MSG_WRTE:
                         Log.d(LOG_TAG, "WRTE");
                         break;
                 }
@@ -94,19 +89,21 @@ public class AdbServer {
     public void init(){
         int version = 0x01000000;
         int maxLength = 256 * 1024;
-        send(CNXN, version, maxLength, "host::features=shell_2".getBytes());
+        send(AdbConstant.MSG_CNXN, version, maxLength, "host::features=shell_2".getBytes());
     }
 
     public void openApk(){
-        send(OPEN, LOCAL_ID, REMOTE_ID, "shell: am start -n com.yumeng.tvservice/.MainActivity.".getBytes());
+        send(AdbConstant.MSG_OPEN, LOCAL_ID, REMOTE_ID, "shell: am start -n com.yumeng.tvservice/.MainActivity.".getBytes());
     }
 
     public void install(){
-        send(OPEN, LOCAL_ID, REMOTE_ID, "shell: pm install -r /data/local/tmp/adbserver.apk.".getBytes());
+        String path = Environment.getExternalStorageDirectory() + File.separator + "YuMeng/download/apks/net.myvst.v2_3120.apk.";
+        String command = "shell: pm install -r " + path;
+        send(AdbConstant.MSG_OPEN, LOCAL_ID, REMOTE_ID, command.getBytes());
     }
 
     public void openSync(){
-        send(OPEN, LOCAL_ID, REMOTE_ID, "sync:\u0000".getBytes());
+        send(AdbConstant.MSG_OPEN, LOCAL_ID, REMOTE_ID, "sync:\u0000".getBytes());
     }
 
     public void pushApk(String filePath) {
@@ -116,7 +113,7 @@ public class AdbServer {
             buf.put("SEND".getBytes("UTF8"));
             buf.putInt(location.length());
             buf.put(location.getBytes("UTF8"));
-            send(WRTE, LOCAL_ID, REMOTE_ID, buf.array());
+            send(AdbConstant.MSG_WRTE, LOCAL_ID, REMOTE_ID, buf.array());
 
             File file = new File(filePath);
 
@@ -132,7 +129,7 @@ public class AdbServer {
                     destPosition = index + 4096;
                     ByteBuffer order = ByteBuffer.allocate(destPosition >= dataLength ? dataLength - index : 4096).order(ByteOrder.LITTLE_ENDIAN);
                     order.put(data, index, destPosition >= dataLength ? dataLength - index : 4096);
-                    send(WRTE, LOCAL_ID, REMOTE_ID, order.array());
+                    send(AdbConstant.MSG_WRTE, LOCAL_ID, REMOTE_ID, order.array());
                     index = destPosition;
                     if (index >= dataLength) {
                         break;
@@ -141,10 +138,10 @@ public class AdbServer {
 
                 ByteBuffer order = ByteBuffer.allocate(5).order(ByteOrder.LITTLE_ENDIAN);
                 order.put("DONE\u0000".getBytes("UTF8"));
-                send(WRTE, LOCAL_ID, REMOTE_ID, order.array());
+                send(AdbConstant.MSG_WRTE, LOCAL_ID, REMOTE_ID, order.array());
                 ByteBuffer order2 = ByteBuffer.allocate(5).order(ByteOrder.LITTLE_ENDIAN);
                 order2.put("QUIT\u0000".getBytes("UTF8"));
-                send(WRTE, LOCAL_ID, REMOTE_ID, order2.array());
+                send(AdbConstant.MSG_WRTE, LOCAL_ID, REMOTE_ID, order2.array());
             } else {
                 Log.i(LOG_TAG, "file not found:" + filePath);
             }
