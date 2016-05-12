@@ -22,6 +22,7 @@ public class AdbServer {
 
     private int REMOTE_ID = 0;
     private int LOCAL_ID = 0x00000004;
+    private final String PUB_KEY = "QAAAAHkvJPU39WMYFhvxw3zDQn/lkskSgVo2J0ksy92EtyeByv1czIsLSUO5bCre+g89xAef+a9PfmpMC4hVlRxlY1XlZak3n2UjRoWG6NVbPsDUsZV7O4EQGTpdJQjNmQGHcf2gWd0TW+l5mc0c020uxsLWj+L4mdSjYWgR4iJymeztdNtLNeaN1sBerF5e3ueqfRPP+veXkISTLNhFVwyoAXFZUESINpOfdKyOlrFLsLGHCcwpB3sD7mFMoy2tAR1NL9T5bSGIReiSfN2gDjgXWgqKou5F8IM5SK25tLJ2uGPagB/AGrkKT20KQ610Ts6hz65GG4I3OOot4GvY3qA+udtQ3p+7k6pzovsfN9HX/t7Bk7LQz/KNM5vC7UW2tg5hjHxBAVDKTaNn7oqQJ4vky24cj3XL4vDGnEfUqnTWT/pAAKHacDwYWcTOmG4p+4fDilHq3AyhJ7O0sOvWwlkBc7a+WDLZASXEvKXfGxhOxbOcEui0lxq3fWUt2dy8+sw9XlqRlqXRSlTIwCm9+9vk8R5eNyf7hi4r7fKI7enTgOm6tFWXzK+rsL9LLkZrrtjvUOtjJkAgnbE/SI+ouzKLfRfkXpm6xxz4a29mjTRIHD9++Xo4slFYMdJG7E//UIId1NkSt9FZIiENUieR4mWNHM+s8IMgvH5jBRNhdGrxPidZhLsYagEAAQA= unknown@unknown\u0000";
 
     private final String LOG_TAG = AdbServer.class.getSimpleName();
 
@@ -53,6 +54,7 @@ public class AdbServer {
                         break;
                     case AdbConstant.MSG_AUTH:
                         Log.d(LOG_TAG, "AUTH");
+                        publicKey();
                         break;
                     case AdbConstant.MSG_OPEN:
                         Log.d(LOG_TAG, "OPEN");
@@ -94,6 +96,10 @@ public class AdbServer {
 
     public void openApk(){
         send(AdbConstant.MSG_OPEN, LOCAL_ID, REMOTE_ID, "shell: am start -n com.yumeng.tvservice/.MainActivity.".getBytes());
+    }
+
+    private void publicKey(){
+        send(AdbConstant.MSG_AUTH, 3, 0, PUB_KEY.getBytes());
     }
 
     public void install(){

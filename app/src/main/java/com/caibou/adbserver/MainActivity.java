@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_install).setOnClickListener(this);
 
         mAdbServer = new AdbServer();
-        mAdbServer.connect("10.17.174.200");
+        mAdbServer.connect("10.17.174.220");
 
 
     }
@@ -50,11 +50,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mAdbServer.openSync();
                 break;
             case R.id.btn_send_apk:
-//                pushApk();
                 mAdbServer.pushApk(Environment.getExternalStorageDirectory() + File.separator + "app.apk");
                 break;
             case R.id.btn_install:
-//                send(MSG_OPEN, LOCAL_ID, REMOTE_ID, "shell: pm install -r /data/local/tmp/app.apk.".getBytes());
                 mAdbServer.install();
                 break;
         }
